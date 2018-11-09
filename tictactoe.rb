@@ -16,6 +16,15 @@
 # If the user has not won, move on to the next players turn
 # ------------------------------------------
 # Repeat until a user has won
+####### AI Easy - Beatable ########
+# If the game difficulty is set to easy
+# Player 2 will become AI
+# The player will randomly throw in any empty space until the game is over
+####### AI Hard - Beatable ########
+# If the game difficulty is set to hard
+# Player 2 will tactically try to beat the opponent
+# But with a random number, if the number is a modulo of the initial random number
+# The player will play a stupid move, otherwise will play smartly
 
 
 class Tictactoe
@@ -26,6 +35,7 @@ class Tictactoe
 		@difficulty = "-"
 		@player_one = "-"
 		@player_two = "-"
+		@ai_probability = rand(1..10)
 	end
 
 
@@ -45,16 +55,34 @@ class Tictactoe
 			# Print out the starting board
 			print_board
 			# Ask the player to pick a move
-			current_move = make_a_move
+
+			if current_player == @player_two
+				if @difficulty == 'easy'
+					current_move = play_stupid
+				elsif @difficulty == 'hard'
+					move = rand(1..100)
+					if @ai_probability % move == 0
+						current_move = play_stupid
+					else
+						current_move = play_smart
+					end
+				end
+			else
+				current_move = make_a_move
+			end
 
 			if check_valid(current_move) == true
 				fill_on_board(current_move, current_player)
-				winner = current_player
+				winner = current_player	
 				current_player = change_player(current_player)
 				if check_win(@board) == true
 					print_board
 					puts "#{winner} wins!"
 					return @game_state = false 
+				elsif @game_state == true && !@board.flatten.include?("-")
+					print_board
+					puts "It's a draw!"
+					return @game_state = false
 				end
 			else
 				puts '--------- Invalid Move! --------'
@@ -119,7 +147,7 @@ class Tictactoe
 
 	# Take the input for the choice of difficulty
 
-	def set_difficulty(choice=nil)
+	def set_difficulty(choice)
 
 		puts '================================'
 		puts '==== Choose your difficulty ===='
@@ -184,11 +212,11 @@ class Tictactoe
 			end
 
 		end
-
+		puts "========="
 	end
 
 	# Take the user input to make a move
-	def make_a_move(x=nil,y=nil)
+	def make_a_move(x,y)
 
 		puts '================================'
 		puts '======= Choose your move! ======'
@@ -250,9 +278,145 @@ class Tictactoe
 
 	end
 
+	# Play a stupid move from the computer
+	def play_stupid
+
+		move = [rand(0..2), rand(0..2)]
+
+		until check_valid(move) == true
+			
+			move = [rand(0..2), rand(0..2)]
+
+		end
+
+		return move
+
+	end
+
+	# Play a smart move from the computer
+	def play_smart
+
+		board_rows = @board
+		board_columns = @board.transpose
+		board_diagonals = [[@board[0][0],@board[1][1],@board[2][2]],[@board[0][2],@board[1][1],@board[2][0]]]
+		p1 = @player_one
+		p2 = @player_two
+
+		# Check if player one has the potential to win
+		board_rows.each_with_index do |row,index|
+
+			if row.count(p1) == 2
+				row.each_with_index do |b,i|
+					if b == "-"
+						return [index, i]
+					end
+				end
+			end
+
+		end
+		
+		board_columns.each_with_index do |column, index|
+
+			if column.count(p1) == 2
+				column.each_with_index do |b,i|
+					if b == "-"
+						return [i, index]
+					end
+				end
+			end
+
+		end
+
+		board_diagonals.each_with_index do |diagonal, index|
+
+			if diagonal.count(p1) == 2 && index == 0
+				diagonal.each_with_index do |b,i|
+					if b == "-"
+						return [i,i]
+					end
+				end
+			elsif diagonal.count(p1) == 2 && index == 1 
+				diagonal.each_with_index do |b,i|
+					if b == "-"
+						case
+
+						when i == 0
+							return [i, 2]
+						when i == 1
+							return [i,i]
+						when i == 2
+							return [2, i]
+						end
+					end
+				end
+			end
+
+		end
+
+		# If he does, play to stop him from winning
+		# If he does not, check if ai player has the potenial to win
+
+		board_rows.each_with_index do |row,index|
+
+			if row.count(p2) == 2
+				row.each_with_index do |b,i|
+					if b == "-"
+						return [index, i]
+					end
+				end
+			end
+
+		end
+		
+		board_columns.each_with_index do |column, index|
+
+			if column.count(p2) == 2
+				column.each_with_index do |b,i|
+					if b == "-"
+						return [i, index]
+					end
+				end
+			end
+
+		end
+
+		board_diagonals.each_with_index do |diagonal, index|
+
+			if diagonal.count(p2) == 2 && index == 0
+				diagonal.each_with_index do |b,i|
+					if b == "-"
+						return [i,i]
+					end
+				end
+			elsif diagonal.count(p2) == 2 && index == 1 
+				diagonal.each_with_index do |b,i|
+					if b == "-"
+						case
+
+						when i == 0
+							return [i, 2]
+						when i == 1
+							return [i,i]
+						when i == 2
+							return [2, i]
+						end
+					end
+				end
+			end
+
+		end
+
+
+		# If he does, play to win the game
+
+		# If neither of these apply, play a stupid move and just dump anywhere
+		return play_stupid
+
+	end
+
 end
 
 ################ Driver Code ###################
-new_board = [["-","-","-"],["-","-","-"],["-","-","-"]]
-tictactoe = Tictactoe.new(new_board)
-tictactoe.play_game!
+# new_board = [["-","-","-"],["-","-","-"],["-","-","-"]]
+# tictactoe = Tictactoe.new(new_board)
+# tictactoe.play_game!

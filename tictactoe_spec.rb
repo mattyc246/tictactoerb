@@ -27,7 +27,7 @@ RSpec.describe Tictactoe do
 		Given(:move_x) { 1 }
 		Given(:move_y) { 1 }
 		When(:results) { tictactoe.make_a_move(move_x,move_y) }
-		Then { results == [1,1] }
+		Then { results == [0,0] }
 	end
 
 	context "#check_valid" do
